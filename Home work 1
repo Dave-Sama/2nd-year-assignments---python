@@ -14,6 +14,156 @@ def parsStr(str):
 
 
 print(parsStr("1001"))
+#question number 1
+def parsStr(str): # expected to accept a string
+    """
+    this function is converting a string to an integer
+    parameters: string
+    return: integer
+    """
+
+
+    num = 0
+    if str[0] == '-': # in a case the "number" is negative
+        for i in range(1, len(str)):
+            num = num + (ord(str[i]) - 48) * pow(10, len(str) - 1 - i)
+        return num/-1
+
+    for i in range(0, len(str)): # in a case the "number" is positive
+        num = num + (ord(str[i]) - 48) * pow(10, len(str)-1-i)
+    return num
+
+
+print(parsStr("1001"))
+
+#questing number 2
+
+def something(tup): # expected to accept a tuple
+    """this function returning the hash key of a tuple
+    parameters: tuple
+    return: integer
+    """
+
+    x = 0
+    if len(tup) == 1:
+        return tup
+
+    for i in range (1,len(tup)):
+        x = x + (31 * tup[i-1] ^ tup[i]) & 0xFF
+    return x
+
+print(something([5,6]))
+
+
+
+#question 3
+
+def interceptPoint(m1,n1,m2,n2):
+    """this function calculating the intercept point of a two linear lines
+    parameters: Incline and Cutting point with the hinges
+    return: cutting points of two linear lines in a x,y format (tuple)
+    """
+    # for x1 = x2
+    if m2-m1 == 0:
+        return 'None'
+    y = (n1*m2-n2*m1)/(m2-m1) # a simple math formula to find our y, given x1=x2
+    x = (y-n1)/m1
+    return (x, y) # returning a tuple with the answer
+
+print(interceptPoint(3,11,5,1)) # an example.
+
+#question 4
+
+def factor_sum(num):
+    """this function detect the prime numbers of a number and summarize them, and return the sum
+    parameters: an integer number
+    return: an integer which is the sum of the prime numbers
+    """
+    my_flag = True #a simple flag
+    my_list = [] #list for storing the prime numbers which we have found.
+    if (num == 1): #first case - invalid number
+        print('this number is not a prime number')
+    elif (num > 1): # second case - valid number
+        for i in range(2, num): #our checking process for a prime numbers. in short - for each number which is
+                                #smaller than our argument, we will iterate through all his divisions to see if he
+                                #could be a prime number.
+            my_flag = True
+            for j in range(2, i):
+                if i % j == 0:
+                    my_flag = False
+            if my_flag == True:
+                my_list.append(i)
+
+    sum = 0
+    for i in range(0, len(my_list)): #calculating the sum of the list of the prime numbers
+        sum = sum + my_list[i]
+
+    return 'the sum of the prime numbers of '+str(num) + ' is ' + str(sum) # returning a string with the result.
+
+num = int(input('put a number')) # let the user choose a number.
+print(factor_sum(num))  # function call
+
+
+#question 5
+
+def bracketsCheck(str):
+    """this function detect if all the round brackets in a given string are balanced - (comes in pairs)
+    parameters: a string
+    return: true/false boolean
+    """
+    if len(str) == 0: # if the length of the string are 0 - meaning - the round brackets in the string are balanced
+        return True
+
+    end = str.find(')') # let's find the ')' character
+    if end == -1: # if we couldn't find - return false
+        return False
+
+    start = str[:end].rfind('(') # let's search from the right to the left the character '('
+    if start == -1:  # if we couldn't find - return false
+        return False
+
+    return bracketsCheck(str[:start] + str[end+1:]) # a call to the function without the (xyz) part.
+
+
+
+print(bracketsCheck('(())'))
+
+#question 6
+
+def printBin(num):
+    """this function converts any decimal number to a binary number and prints it on the screen via recursion
+    parameters: an integer
+    return: nothing.
+    """
+    if num != 1: # our base.
+        printBin(int(num/2))
+    print(num % 2, end="")
+
+printBin(100) # for example
+
+
+#questing 7
+
+def evenFactorial(num):
+    """this function multiplying all the even numbers from [1,n)
+     parameters: a number
+     return: the multiplication of all the even numbers from [1,n)
+     """
+    if 0 <= num < 2: # first case - incorrect value
+        return 0
+    if num == 2: # second case, which is the vase of our recursion
+        return num
+    else:
+        if num % 2 != 0: # odd number - doesn't need to take in count, just keep re recursion
+            return evenFactorial(num - 1)
+        else:  # a case of a number which is an even number.
+            return num * evenFactorial(num - 1) # multiply the even number with the returning value of the function
+
+
+
+print(evenFactorial(5)) # for example
+
+
 
 #questing number 2
  """this function return the hash key of a tuple"""
