@@ -1,0 +1,505 @@
+# Assignment: 4
+# Campus: Ashdod
+
+
+# question 1.1
+# instance implementation:
+def make_instance(cls):
+    """Return a new object instance, which is a dispatch dictionary."""
+    attributes = {}
+
+    def get_value(name):
+        if name in attributes:
+            return attributes[name]
+        else:
+            value = cls['get'](name)
+            return bind_method(value, instance)
+
+    def set_value(name, value):
+        attributes[name] = value
+
+    instance = {'get': get_value, 'set': set_value}
+    return instance
+
+
+def bind_method(value, instance):
+    """Return a bound method if value is callable, or value otherwise."""
+    if callable(value):
+        def method(*args):
+            return value(instance, *args)
+
+        return method
+    else:
+        return value
+
+
+def make_class(attributes, *base_class):
+    """Return a new class, which is a dispatch dictionary."""
+
+    def get_value(name):
+        if name in attributes:
+            return attributes[name]
+        elif len(base_class) > 0:
+            for arg in base_class:
+                return arg['get'](name)
+
+    def set_value(name, value):
+        attributes[name] = value
+
+    def new(*args):
+        return init_instance(cls, *args)
+
+    def init_instance(cls, *args):
+        """Return a new object with type cls, initialized with args."""
+        instance = make_instance(cls)
+        init = cls['get']('__init__')
+        if init:
+            init(instance, *args)
+        return instance
+
+    cls = {'get': get_value, 'set': set_value, 'new': new}
+    return cls
+
+# example of a class implementation and multiple inheritance:
+def make_account_class():
+    """Return the Account class, which has deposit and withdraw methods."""
+    def __init__(self, account_holder):
+        self['set']('holder', account_holder)
+        self['set']('balance', 0)
+    def deposit(self, amount):
+        new_balance = self['get']('balance') + amount
+        self['set']('balance', new_balance)
+        return self['get']('balance')
+    def withdraw(self, amount):
+        balance = self['get']('balance')
+        if amount > balance:
+            return 'Insufficient funds'
+        self['set']('balance', balance - amount)
+        return self['get']('balance')
+    return make_class({'__init__': __init__, 'deposit': deposit,
+            'withdraw': withdraw, 'interest': 0.02})
+def make_checking_account_class(*arg):
+    def withdraw(self, amount):
+        return account['get']('withdraw')(self, amount + 1)
+    return make_class({'withdraw': withdraw, 'interest': 0.01}, *arg)
+
+# creating a new instance of the base class
+account = make_account_class()
+jim_acct = account['new']('Jim')
+# creating an instance of the derived class
+CheckingAccount = make_checking_account_class(account)
+
+jack_acct = CheckingAccount['new']('Jack')
+# overloading withdraw method:
+print(jack_acct['get']('deposit')(10))
+print(jack_acct['get']('withdraw')(5))
+
+
+
+
+# question 1.2
+def make_MyDate_class():
+    """Return the MyDate class."""
+
+    def __init__(self, day, month, year=2020):
+        self['set']('day', day)
+        self['set']('month', month)
+        self['set']('year', year)
+
+    def getDay(self):
+        return self['get']('day')
+
+    def getMonth(self):
+        return self['get']('month')
+
+    def getYear(self):
+        return self['get']('year')
+
+    def setDay(self, day):
+        if day >= 1 and day <= 30:
+            self['set']('day', day)
+
+    def setMonth(self, month):
+        if month >= 1 and month <= 12:
+            self['set']('month', month)
+
+    def setYear(self, year):
+        if year >= 1900 and year <= 2100:
+            self['set']('year', year)
+
+    def str(self):
+        return (f"{self['get']('day')}.{self['get']('month')}.{self['get']('year')}")
+
+    def repr(self):
+        return (f"MyDate['new']({self['get']('day')},{self['get']('month')},{self['get']('year')})")
+
+    return make_class({'__init__': __init__, 'getDay': getDay,
+                       'getMonth': getMonth, 'getYear': getYear,
+                       'setDay': setDay, 'setMonth': setMonth,
+                       'setYear': setYear, 'str': str, 'repr': repr})
+
+
+MyDate = make_MyDate_class()
+
+
+alons_BD = MyDate['new'](23,1)
+
+
+print(alons_BD['get']('str')())
+print(alons_BD['get']('repr')())
+f = eval(alons_BD['get']('repr')())
+print(f['get']('str')())
+
+def make_Person_class():
+    """Return the person class."""
+
+    def __init__(self, fName, lName, myDate, id):
+        self['set']('First_name', fName)
+        self['set']('Last_name', lName)
+        self['set']('Date', myDate)
+        self['set']('Id', id)
+
+    def getDate(self):
+        return self['get']('Date')
+
+    def getFname(self):
+        return self['get']('First_name')
+
+    def getLname(self):
+        return self['get']('Last_name')
+
+    def getId(self):
+        return self['get']('Id')
+
+    def setDate(self, my_date):
+        self['set']('Date', my_date)
+
+    def setFname(self, fName):
+        if type(fName) == type('abc'):
+            good = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+            for i in range(0, len(fName)):
+                if fName[i] not in good:
+                    fName[i].pop(i)
+            fName.lower()
+            fName[0].upper()
+            self['set']('First_name', fName)
+
+    def setLname(self, lName):
+        if type(lName) == type('abc'):
+            good = 'qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
+            for i in range(0, len(lName)):
+                if lName[i] not in good:
+                    lName[i].pop(i)
+            lName.lower()
+            lName[0].upper()
+            self['set']('Last_name', lName)
+
+    def setId(self, id):
+        self['set']('Id', abs(id))
+
+    def str(self):
+        return (
+            f"Name: {self['get']('First_name')} {self['get']('Last_name')}\nDoB: {self['get']('Date')['get']('str')()}\nID: {self['get']('Id')}\n")
+
+    def repr(self):
+        return f"Person['new']({self['get']('First_name')},{self['get']('Last_name')},{self['get']('Date')}, {self['get']('Id')})"
+
+    return make_class({'__init__': __init__, 'getDate': getDate,
+                       'getFname': getFname, 'getLname': getLname,
+                       'getId': getId, 'setDate': setDate,
+                       'setFname': setFname, 'setLname': setLname, 'setId': setId, 'str': str, 'repr': repr})
+
+
+Person = make_Person_class()
+
+
+alons_BD = MyDate['new'](23, 1)
+dave = Person['new']('dave','haron', alons_BD, 12345)
+print(dave['get']('str')())
+
+
+def make_Student_class(Person):
+    def __init__(self, fName, lName, myDate, id, dep, avg, sen):
+        self['set']('First_name', fName)
+        self['set']('Last_name', lName)
+        self['set']('Date', myDate)
+        self['set']('Id', id)
+        self['set']('department', dep)
+        self['set']('avg', avg)
+        self['set']('seniority', sen)
+
+    def getDepartment(self):
+        return self['get']('dep')
+
+    def getAvg(self):
+        return self['get']('avg')
+
+    def getSeniority(self):
+        return self['get']('seniority')
+
+    def setDepartment(self, dep):
+        self['set']('dep', dep)
+
+    def setAvg(self, avg):
+        self['set']('avg', avg)
+
+    def setSenioriry(self, seniority):
+        self['set']('seniority', seniority)
+
+    def str(self):
+        return (
+            f"Name: {self['get']('First_name')} {self['get']('Last_name')}\nDoB: {self['get']('Date')['get']('str')()}\nID: {self['get']('Id')}\nLearning: {self['get']('department')}\nAvg: {self['get']('avg')}\nSeniority:{self['get']('seniority')}\n")
+
+    def repr(self):
+        return f"Person['new']({self['get']('First_name')},{self['get']('Last_name')},{self['get']('Date')}, {self['get']('Id')}, {self['get']('department')}, {self['get']('avg')}, {self['get']('seniority')})"
+
+    return make_class({'__init__': __init__, 'getDepartment': getDepartment,
+                       'getAvg': getAvg, 'getSeniority': getSeniority,
+                       'setDepartment': setDepartment, 'setAvg': setAvg,
+                       'setSenioriry': setSenioriry, 'str': str, 'repr': repr}, Person)
+
+
+Student = make_Student_class(Person)
+
+
+# dave = Student['new']('dave', 'haron', alons_BD, 12345, 'softwear Engineering', 98.0, 3)
+
+
+def make_Faculty_class(Person):
+    def __init__(self, fName, lName, myDate, id, teach, salary, sen):
+        self['set']('First_name', fName)
+        self['set']('Last_name', lName)
+        self['set']('Date', myDate)
+        self['set']('Id', id)
+        self['set']('teaching', teach)
+        self['set']('salary', salary)
+        self['set']('seniority', sen)
+
+    def getTeaching(self):
+        return self['get']('teaching')
+
+    def getSalary(self):
+        return self['get']('salary')
+
+    def getSeniority(self):
+        return self['get']('seniority')
+
+    def setTeaching(self, teaching):
+        self['set']('teaching', teaching)
+
+    def setSalary(self, salary):
+        self['set']('salary', salary)
+
+    def setSenioriry(self, seniority):
+        self['set']('seniority', seniority)
+
+    def str(self):
+        return (
+            f"Name: {self['get']('First_name')} {self['get']('Last_name')}\nDoB: {self['get']('Date')['get']('str')()}\nID: {self['get']('Id')}\nTeaching: {self['get']('teaching')}\nSalary: {self['get']('salary')}\nSeniority:{self['get']('seniority')}\n")
+
+    def repr(self):
+        return f"Person['new']({self['get']('First_name')},{self['get']('Last_name')},{self['get']('Date')}, {self['get']('Id')}, {self['get']('teaching')}, {self['get']('salary')}, {self['get']('seniority')})"
+
+    return make_class({'__init__': __init__, 'getTeaching': getTeaching,
+                       'getSalary': getSalary, 'getSeniority': getSeniority,
+                       'setTeaching': setTeaching, 'setSalary': setSalary,
+                       'setSenioriry': setSenioriry, 'str': str, 'repr': repr}, Person)
+
+
+Faculty = make_Faculty_class(Person)
+
+
+def make_TA_class(*args):
+    def __init__(self, fName, lName, myDate, id, dep, avg, teach, salary, sen):
+        self['set']('First_name', fName)
+        self['set']('Last_name', lName)
+        self['set']('Date', myDate)
+        self['set']('Id', id)
+        self['set']('department', dep)
+        self['set']('avg', avg)
+        self['set']('teaching', teach)
+        self['set']('salary', salary)
+        self['set']('seniority', sen)
+
+    def str(self):
+        return args[0]['get']('str')(self) + f"Teaching: {self['get']('teaching')}\nSalary: {self['get']('salary')}\n"
+
+    def repr(self):
+        return f"TA['new']('{self['get']('First_name')}','{self['get']('Last_name')}',{self['get']('Date')['get']('repr')()}, {self['get']('Id')}, '{self['get']('department')}', {self['get']('avg')}, '{self['get']('teaching')}', {self['get']('salary')}, {self['get']('seniority')})"
+
+    return make_class({'__init__': __init__, 'str': str, 'repr': repr}, args)
+
+
+TA = make_TA_class(Student, Faculty)
+
+
+dave3 = TA['new']('dave', 'haron', alons_BD, 12345, 'software Engineering', 98.0, 'software Engineering', 1000.0, 3)
+
+print(dave3['get']('str')())
+
+print(dave3['get']('repr')())
+f = eval(dave3['get']('repr')())
+print(f['get']('str')())
+
+
+# **********-----------------Question_2-----------------**********
+
+
+class Rlist(object):
+    """A recursive list consisting of a first element and the rest."""
+
+    class EmptyList(object):
+        def __len__(self):
+            return 0
+
+    empty = EmptyList()
+
+    def __init__(self, first, rest=empty):
+        self.first = first
+        self.rest = rest
+
+    def __repr__(self):
+        args = repr(self.first)
+        if self.rest is not Rlist.empty:
+            args += ', {0}'.format(repr(self.rest))
+        return 'Rlist({0})'.format(args)
+
+    def __len__(self):
+        return 1 + len(self.rest)
+
+    def __getitem__(self, i):
+        if i == 0:
+            return self.first
+        return self.rest[i - 1]
+
+
+from math import gcd
+
+
+class Rational(object):
+    def __init__(self, numer, denom):
+        g = gcd(numer, denom)
+        self.numer = numer // g
+        self.denom = denom // g
+
+    def __repr__(self):
+        return 'Rational({0}, {1})'.format(self.numer, self.denom)
+
+
+def type_tag(x):
+    return type_tag.tags[type(x)]
+
+
+type_tag.tags = {Rlist: 'rls', int: 'int', Rational: 'rat'}
+
+
+def apply(operator_name, x, y):
+    if operator_name == '+': operator_name = "add"
+    if operator_name == '*': operator_name = "mul"
+    tags = (type_tag(x), type_tag(y))
+    key = (operator_name, tags)
+    return apply.implementations[key](x, y)
+
+
+def add_Rational_Rlist(Rational1, Rlist1):
+    if Rlist1 is Rlist.empty:
+        return Rlist(Rational1)
+    return Rlist(Rlist1.first, add_Rational_Rlist(Rational1, Rlist1.rest))
+
+
+def add_Rlist_Rlist(Rlist1, Rlist2):
+    if Rlist1 is Rlist.empty:
+        return Rlist2
+    return Rlist(Rlist1.first, add_Rlist_Rlist(Rlist1.rest, Rlist2))
+
+
+def add_Rational_Rational(Rational1, Rational2):
+    nRational1, dRational1 = Rational1.numer, Rational1.denom
+    nRational2, dRational2 = Rational2.numer, Rational2.denom
+    return Rational(nRational1 * dRational2 + nRational2 * dRational1, dRational1 * dRational2)
+
+
+def add_int_int(int1, int2):
+    return int1 + int2
+
+
+def add_int_Rational(int1, Rational1):
+    nRational1, dRational1 = Rational1.numer, Rational1.denom
+    return Rational(nRational1, dRational1 + int1 * nRational1)
+
+
+def mul_int_Rlist(int1, Rlist1):
+    if Rlist1 is Rlist.empty:
+        return Rlist1
+    new_Rlist = add_Rlist_Rlist(Rlist1, Rlist1)
+    for i in range(0, int1 - 1):
+        new_Rlist = add_Rlist_Rlist(new_Rlist, Rlist1)
+    return new_Rlist
+
+
+def mul_Rational_Rational(Rational1, Rational2):
+    nRational1, dRational1 = Rational1.numer, Rational1.denom
+    nRational2, dRational2 = Rational2.numer, Rational2.denom
+    return Rational(nRational1 * nRational2, dRational1 * dRational2)
+
+
+def mul_int_int(int1, int2):
+    return int1 * int2
+
+
+def mul_int_Rational(int1, Rational1):
+    nRational1, dRational1 = Rational1.numer, Rational1.denom
+    return Rational(nRational1 * int1, dRational1)
+
+
+apply.implementations = {('add', ('rat', 'rls')): add_Rational_Rlist,
+                         ('add', ('rls', 'rat')): lambda x, y: add_Rational_Rlist(y, x),
+                         ('add', ('rls', 'rls')): add_Rlist_Rlist,
+                         ('add', ('rat', 'rat')): add_Rational_Rational,
+                         ('add', ('int', 'int')): add_int_int,
+                         ('add', ('int', 'rat')): add_int_Rational,
+                         ('add', ('rat', 'int')): lambda x, y: add_int_Rational(y, x),
+                         ('mul', ('int', 'rls')): mul_int_Rlist,
+                         ('mul', ('rls', 'int')): lambda x, y: mul_int_Rlist(y, x),
+                         ('mul', ('rat', 'rat')): mul_Rational_Rational,
+                         ('mul', ('int', 'int')): mul_int_int,
+                         ('mul', ('int', 'rat')): mul_int_Rational,
+                         ('mul', ('rat', 'int')): lambda x, y: mul_int_Rational(y, x)
+                         }
+
+print('\n **** + examples: ****\n')
+print(apply('+', Rational(3, 5), Rlist(2, Rlist(5))))
+print(apply('+', Rlist(2, Rlist(5)), Rational(3, 5)))
+print(apply('+', Rlist(2, Rlist(5)), Rlist(2, Rlist(5))))
+print(apply('+', Rational(3, 5), Rational(2, 5)))
+print(apply('+', 5, 5))
+print(apply('+', 5, Rational(2, 5)))
+print(apply('+', Rational(2, 5), 5))
+
+print('\n **** ADD examples: ****\n')
+print(apply('add', Rational(3, 5), Rlist(2, Rlist(5))))
+print(apply('add', Rlist(2, Rlist(5)), Rational(3, 5)))
+print(apply('add', Rlist(2, Rlist(5)), Rlist(2, Rlist(5))))
+print(apply('add', Rational(3, 5), Rational(2, 5)))
+print(apply('add', 5, 5))
+print(apply('add', 5, Rational(2, 5)))
+print(apply('add', Rational(2, 5), 5))
+
+
+print('\n **** * examples: ****\n')
+
+print(apply('*', 5, Rlist(2, Rlist(5))))
+print(apply('*', Rlist(2, Rlist(5)), 5))
+print(apply('*', Rational(3, 5), Rational(2, 5)))
+print(apply('*', 5, 5))
+print(apply('*', 5, Rational(2, 5)))
+print(apply('*', Rational(2, 5), 5))
+
+print('\n **** MUL examples: ****\n')
+
+print(apply('mul', 5, Rlist(2, Rlist(5))))
+print(apply('mul', Rlist(2, Rlist(5)), 5))
+print(apply('mul', Rational(3, 5), Rational(2, 5)))
+print(apply('mul', 5, 5))
+print(apply('mul', 5, Rational(2, 5)))
+print(apply('mul', Rational(2, 5), 5))
