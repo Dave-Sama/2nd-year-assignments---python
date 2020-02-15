@@ -1,0 +1,83 @@
+
+# # question 3 #
+
+def find_x0(f):
+    """
+    we will use the idea about assuming that we will have an x value that will give use a y = 0.
+    if the ( y(x(i)) > 0 and y(x(i-1)) < 0 ) or ( y(x(i)) < 0 and y(x(i-1)) > 0 )
+    """
+    x0 = -100 # we'll start from a false x
+    print("-----\nx | y\n-----") # created a small table which is compering x values and y values.
+    for i in range(1, 10):
+        print(i, "|", f(i), "\n-----")
+        if (f(i - 1) < 0 < f(i)) or (f(i - 1) > 0 > f(i)): # here we're applying the principle we talked before.
+            x0 = (i + (i - 1)) / 2
+            return x0 # if the conditions have been made - return the new x0
+    return x0 # if we have been iterated through all the loop and haven't found a match - returning -100.
+
+def newton(f, df, x0, ep = 0, integer = 0 ):
+
+    """
+    this function can calculate the root of an function, given function's derive, a base,and an order of number of iterations
+    """
+
+    if x0 == -100:
+        return 'none'
+
+    x_arr = [] # for the values on the x axis
+    y_arr = [] # for the values on the y axis
+
+    x_arr.append(x0) # append the base to the list of x values.
+    y_arr.append(f(x_arr[0])) # append the y value that have been accepted from the x value
+
+    for i in range(1, integer):
+        x_arr.append(x_arr[i - 1] - f(x_arr[i - 1]) / df(x_arr[i - 1])) # using newton's function to calculate the next x value
+        y_arr.append(f(x_arr[i])) # calculating the y value of the function with the x value that we have calculated.
+
+
+    print("-----\nx | y\n-----")  # created a small table which is compering x values and y values.
+    for i in range(0, len(x_arr)):
+        print(round(x_arr[i], 4), '|', round(y_arr[i], 4))
+
+    min1 = y_arr[0] # with min, we will find the closet y to 0, and for it's index we will return the right x from the
+                   #  x list of values.
+    min2 = y_arr[0]
+
+    for i in y_arr:
+        if 0 >= i > min1:
+            min1 = i
+
+        if min2 > i >= 0:
+            min2 = i
+
+    if abs(min1) > abs(min2):
+        return x_arr[y_arr.index(min2)]
+    else:
+        return x_arr[y_arr.index(min1)]
+
+
+
+print(f"the root is: {newton(lambda x: x**3 - x**2 - 1, lambda x:3*x**2 - 2*2, find_x0(lambda x: x**3 - x**2 - 1),10,10)}")
+
+
+# question 4 #
+
+first = lambda x: x ** 3 # first function
+second = lambda x: x + 1 # second function
+
+
+def composition(f, s):
+    """
+    this function can composite two different functions and return the composition's value for a specific x.
+
+    examples:
+
+    print(composition(first, second, 12)) # first example f(g(x))
+    print(composition(second, first, 12)) # second example g(f(x))
+    """
+
+    return lambda x: f(s(x))
+
+
+add_one_and_power = composition(first, second)
+print(add_one_and_power(12))
